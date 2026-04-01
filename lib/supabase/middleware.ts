@@ -8,6 +8,7 @@ const PUBLIC_PATHS = [
   '/features',
   '/about',
   '/api',
+  '/onboarding',
 ]
 
 export async function updateSession(request: NextRequest) {
