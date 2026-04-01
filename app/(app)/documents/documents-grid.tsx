@@ -25,7 +25,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { formatFileSize, formatDate, getRelativeTime } from '@/lib/format'
-import type { Document, DocumentType } from '@/lib/types'
+import type { Document } from '@/lib/types'
+
+type DocumentType = 'invoice' | 'receipt' | 'bill' | 'contract' | 'image' | 'spreadsheet' | 'other'
+
+function getDocumentType(fileType: string): DocumentType {
+  if (fileType.includes('pdf')) return 'invoice'
+  if (fileType.includes('image')) return 'image'
+  if (fileType.includes('sheet') || fileType.includes('excel') || fileType.includes('csv')) return 'spreadsheet'
+  return 'other'
+}
 import { 
   Search, 
   FileText, 
@@ -56,13 +65,15 @@ const documentTypeIcons: Record<DocumentType, typeof FileText> = {
   receipt: Receipt,
   bill: FileText,
   contract: FileText,
+  image: FileImage,
+  spreadsheet: FileText,
   other: FileImage,
 }
 
 const ocrStatusConfig = {
   pending: { icon: Clock, color: 'text-muted-foreground', label: 'Pending' },
   processing: { icon: Bot, color: 'text-warning', label: 'Processing' },
-  completed: { icon: CheckCircle2, color: 'text-success', label: 'Completed' },
+  complete: { icon: CheckCircle2, color: 'text-success', label: 'Complete' },
   failed: { icon: XCircle, color: 'text-destructive', label: 'Failed' },
 }
 
@@ -72,8 +83,9 @@ export function DocumentsGrid({ documents, companyId, userId }: DocumentsGridPro
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null)
 
   const filteredDocuments = documents.filter((doc) => {
-    const matchesSearch = doc.name.toLowerCase().includes(search.toLowerCase())
-    const matchesType = typeFilter === 'all' || doc.type === typeFilter
+    const matchesSearch = doc.file_name?.toLowerCase().includes(search.toLowerCase())
+    const docType = getDocumentType(doc.file_type || '')
+    const matchesType = typeFilter === 'all' || docType === typeFilter
     return matchesSearch && matchesType
   })
 
@@ -145,7 +157,7 @@ export function DocumentsGrid({ documents, companyId, userId }: DocumentsGridPro
       <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{selectedDocument?.name}</DialogTitle>
+            <DialogTitle>{selectedDocument?.file_name}</DialogTitle>
           </DialogHeader>
           {selectedDocument && (
             <DocumentPreview document={selectedDocument} />
@@ -163,9 +175,12 @@ function DocumentCard({
   document: Document
   onClick: () => void 
 }) {
-  const Icon = documentTypeIcons[document.type] || FileText
-  const OcrIcon = ocrStatusConfig[document.ocr_status].icon
-  const ocrColor = ocrStatusConfig[document.ocr_status].color
+  const docType = getDocumentType(document.file_type || '')
+  const Icon = documentTypeIcons[docType] || FileText
+  const status = document.ocr_status || 'pending'
+  const statusConfig = ocrStatusConfig[status === 'completed' ? 'complete' : status] || ocrStatusConfig.pending
+  const OcrIcon = statusConfig.icon
+  const ocrColor = statusConfig.color
 
   return (
     <Card 
@@ -195,9 +210,9 @@ function DocumentCard({
                 <Download className="mr-2 h-4 w-4" />
                 Download
               </DropdownMenuItem>
-              {document.journal_entry && (
+              {document.journal_entry_id && (
                 <DropdownMenuItem asChild>
-                  <Link href={`/journal/${document.journal_entry.id}`}>
+                  <Link href={`/journal/${document.journal_entry_id}`}>
                     <LinkIcon className="mr-2 h-4 w-4" />
                     View Entry
                   </Link>
@@ -211,41 +226,37 @@ function DocumentCard({
           </DropdownMenu>
         </div>
 
-        <h3 className="font-medium truncate mb-1" title={document.name}>
-          {document.name}
+        <h3 className="font-medium truncate mb-1" title={document.file_name}>
+          {document.file_name}
         </h3>
         
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-          <span>{formatFileSize(document.file_size)}</span>
+          <span>{formatFileSize(document.file_size_bytes)}</span>
           <span>•</span>
-          <span>{getRelativeTime(document.created_at)}</span>
+          <span>{getRelativeTime(document.uploaded_at)}</span>
         </div>
 
         <div className="flex items-center justify-between">
           <Badge variant="outline" className="text-xs capitalize">
-            {document.type}
+            {docType}
           </Badge>
           <div className="flex items-center gap-1">
             <OcrIcon className={cn('h-3.5 w-3.5', ocrColor)} />
             <span className={cn('text-xs', ocrColor)}>
-              {ocrStatusConfig[document.ocr_status].label}
+              {statusConfig.label}
             </span>
           </div>
         </div>
-
-        {document.party && (
-          <p className="text-xs text-muted-foreground mt-2 truncate">
-            Party: {document.party.name}
-          </p>
-        )}
       </CardContent>
     </Card>
   )
 }
 
 function DocumentPreview({ document }: { document: Document }) {
-  const isImage = document.mime_type.startsWith('image/')
-  const isPDF = document.mime_type === 'application/pdf'
+  const fileType = document.file_type || ''
+  const isImage = fileType.startsWith('image/')
+  const isPDF = fileType === 'application/pdf'
+  const docType = getDocumentType(fileType)
 
   return (
     <div className="space-y-4">
@@ -264,41 +275,35 @@ function DocumentPreview({ document }: { document: Document }) {
       <div className="grid gap-3 text-sm">
         <div className="flex justify-between">
           <span className="text-muted-foreground">Type</span>
-          <span className="capitalize">{document.type}</span>
+          <span className="capitalize">{docType}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">Size</span>
-          <span>{formatFileSize(document.file_size)}</span>
+          <span>{formatFileSize(document.file_size_bytes)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">Uploaded</span>
-          <span>{formatDate(document.created_at, 'medium')}</span>
+          <span>{formatDate(document.uploaded_at, 'medium')}</span>
         </div>
-        {document.party && (
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Party</span>
-            <span>{document.party.name}</span>
-          </div>
-        )}
-        {document.journal_entry && (
+        {document.journal_entry_id && (
           <div className="flex justify-between">
             <span className="text-muted-foreground">Journal Entry</span>
             <Link 
-              href={`/journal/${document.journal_entry.id}`}
+              href={`/journal/${document.journal_entry_id}`}
               className="text-accent hover:underline"
             >
-              {document.journal_entry.entry_number}
+              View Entry
             </Link>
           </div>
         )}
       </div>
 
       {/* OCR Data */}
-      {document.ocr_status === 'completed' && document.ocr_data && (
+      {(['complete', 'completed'].includes(document.ocr_status || '')) && document.ocr_extracted_data && (
         <div className="border-t pt-4">
           <h4 className="font-medium mb-2">Extracted Data</h4>
           <pre className="bg-muted rounded-lg p-3 text-xs overflow-auto max-h-40">
-            {JSON.stringify(document.ocr_data, null, 2)}
+            {JSON.stringify(document.ocr_extracted_data, null, 2)}
           </pre>
         </div>
       )}
@@ -309,7 +314,7 @@ function DocumentPreview({ document }: { document: Document }) {
           <Download className="mr-2 h-4 w-4" />
           Download
         </Button>
-        {!document.journal_entry && (
+        {!document.journal_entry_id && (
           <Button className="flex-1">
             <LinkIcon className="mr-2 h-4 w-4" />
             Create Entry
