@@ -33,11 +33,16 @@ export function SignUpForm() {
     try {
       const supabase = createClient()
 
-      // Sign up — Supabase email confirmation must be OFF in Auth settings
+      // Sign up
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName } },
+        options: {
+          emailRedirectTo:
+            process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
+            `${window.location.origin}/auth/callback`,
+          data: { full_name: fullName },
+        },
       })
 
       if (signUpError) {
