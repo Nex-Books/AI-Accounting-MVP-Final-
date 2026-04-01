@@ -1,5 +1,4 @@
 import { streamText, tool, convertToModelMessages } from 'ai'
-import { openai } from '@ai-sdk/openai'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { PLAN_LIMITS, type PlanTier } from '@/lib/types'
@@ -104,7 +103,7 @@ Today's date: ${new Date().toISOString().split('T')[0]}
 
   try {
     const result = streamText({
-      model: openai('gpt-4o-mini'),
+      model: 'openai/gpt-4o-mini',
       system: SYSTEM_PROMPT + '\n\n' + contextMessage,
       messages: await convertToModelMessages(messages),
       tools: {

@@ -48,3 +48,19 @@
 [00:21:25.194] Browser LOG     %c[Vercel Web Analytics]%c [view] https://vm-t0462zl3e63fumvewvey1a.vusercontent.net/auth/login color: rgb(120, 120, 120) color: inherit {"dp":"/auth/login","o":"https://vm-t0462zl3e63fumvewvey1a.vusercontent.net/auth/login","r":"https://v0.app/","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1775050446091} /_vercel/insights/view
 [00:21:41.326] Server  LOG     ✓ Compiled in 55ms
 [00:22:07.665] Server  LOG       Reload env: .env.development.local
+[00:22:10.144] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:22:10.144] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:22:10.144] Browser LOG     %c[Vercel Web Analytics]%c [view] https://vm-t0462zl3e63fumvewvey1a.vusercontent.net/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"https://vm-t0462zl3e63fumvewvey1a.vusercontent.net/","r":"https://v0.app/","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1775050490662} /_vercel/insights/view
+[00:39:26.715] Server  LOG       Reload env: .env.development.local
+[00:39:27.265] Server  LOG     ✓ Compiled in 415ms
+[00:39:30.239] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:39:30.239] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:39:30.239] Browser LOG     %c[Vercel Web Analytics]%c [view] https://vm-t0462zl3e63fumvewvey1a.vusercontent.net/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"https://vm-t0462zl3e63fumvewvey1a.vusercontent.net/","r":"https://v0.app/","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1775051531404} /_vercel/insights/view
+[00:39:30.940] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:39:30.940] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:39:30.940] Browser LOG     %c[Vercel Web Analytics]%c [view] https://vm-t0462zl3e63fumvewvey1a.vusercontent.net/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"https://vm-t0462zl3e63fumvewvey1a.vusercontent.net/","r":"https://v0.app/","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1775051532014} /_vercel/insights/view
+[00:39:49.881] Server  LOG       Reload env: .env.development.local
+[00:39:51.373] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:39:51.373] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:39:51.373] Browser LOG     %c[Vercel Web Analytics]%c [view] https://vm-t0462zl3e63fumvewvey1a.vusercontent.net/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"https://vm-t0462zl3e63fumvewvey1a.vusercontent.net/","r":"https://v0.app/","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1775051552499} /_vercel/insights/view
+[01:01:13.710] Server  LOG       Reload env: .env.development.local

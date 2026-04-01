@@ -96,11 +96,12 @@ async function updateSession(request) {
     let supabaseResponse = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$1$2e$6_$40$opentelemetry$2b$api$40$1$2e$9$2e$0_react$2d$dom$40$19$2e$2$2e$4_react$40$19$2e$2$2e$4_$5f$react$40$19$2e$2$2e$4$2f$node_modules$2f$next$2f$server$2e$js__$5b$middleware$5d$__$28$ecmascript$29$__["NextResponse"].next({
         request
     });
-    const supabaseUrl = ("TURBOPACK compile-time value", "https://ybuomfygzhlefwowldhx.supabase.co");
-    const supabaseAnonKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlidW9tZnlnemhsZWZ3b3dsZGh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNDU5NjgsImV4cCI6MjA5MDYyMTk2OH0.pAZZubln1Li78hlwYzhv_asJh_2rX9e6kv8Pl0L1iKs");
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     // If no Supabase config, pass through
-    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
-    ;
+    if (!supabaseUrl || !supabaseAnonKey) {
+        return supabaseResponse;
+    }
     const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f40$supabase$2b$ssr$40$0$2e$5$2e$2_$40$supabase$2b$supabase$2d$js$40$2$2e$47$2e$10$2f$node_modules$2f40$supabase$2f$ssr$2f$dist$2f$module$2f$createServerClient$2e$js__$5b$middleware$5d$__$28$ecmascript$29$__["createServerClient"])(supabaseUrl, supabaseAnonKey, {
         cookies: {
             getAll () {

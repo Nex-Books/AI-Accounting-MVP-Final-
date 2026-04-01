@@ -4,12 +4,20 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { formatCurrency, formatDate, getStatusColor } from '@/lib/format'
-import type { JournalEntry } from '@/lib/types'
+import { formatCurrency, formatDate } from '@/lib/format'
 import { ArrowRight } from 'lucide-react'
 
+interface JournalWithLines {
+  id: string
+  date: string
+  description: string
+  reference_number: string | null
+  created_by_ai: boolean
+  lines?: Array<{ debit: number; credit: number }>
+}
+
 interface RecentJournalsProps {
-  journals: JournalEntry[]
+  journals: JournalWithLines[]
 }
 
 export function RecentJournals({ journals }: RecentJournalsProps) {
@@ -55,19 +63,19 @@ export function RecentJournals({ journals }: RecentJournalsProps) {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm font-medium">
-                    {journal.entry_number}
+                    {journal.reference_number || journal.id.slice(0, 8)}
                   </span>
-                  <Badge variant="outline" className={getStatusColor(journal.status)}>
-                    {journal.status}
-                  </Badge>
+                  {journal.created_by_ai && (
+                    <Badge variant="outline" className="text-xs">AI</Badge>
+                  )}
                 </div>
                 <p className="text-sm text-muted-foreground line-clamp-1">
-                  {journal.narration || 'No narration'}
+                  {journal.description || 'No description'}
                 </p>
               </div>
               <div className="text-right">
                 <p className="font-medium">
-                  {formatCurrency(journal.total_debit)}
+                  {formatCurrency(journal.lines?.reduce((sum, l) => sum + l.debit, 0) || 0)}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {formatDate(journal.date, 'short')}
