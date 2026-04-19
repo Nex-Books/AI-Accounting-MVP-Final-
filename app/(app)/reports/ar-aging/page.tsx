@@ -60,8 +60,8 @@ async function getARAgingData(companyId: string): Promise<AgingRow[]> {
 
   lines.forEach(line => {
     const partyId = line.party_id
-    const partyName = (line.party as { name: string } | null)?.name || 'Unknown'
-    const entryDate = new Date((line.journal_entry as { date: string } | null)?.date || today)
+    const partyName = ((line.party as unknown) as { name: string } | null)?.name || 'Unknown'
+    const entryDate = new Date(((line.journal_entry as unknown) as { date: string } | null)?.date || today)
     const daysDiff = Math.floor((today.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24))
     const amount = (line.debit || 0) - (line.credit || 0)
 
@@ -110,7 +110,7 @@ export default async function ARAgingPage() {
     <div className="p-6 space-y-6">
       <Suspense fallback={<Skeleton className="h-[600px] rounded-xl" />}>
         <ARAgingReport 
-          data={data} 
+          data={data as unknown as AgingRow[]} 
           companyName={context.company.name}
         />
       </Suspense>

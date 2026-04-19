@@ -24,15 +24,19 @@ export interface Account {
   company_id: string
   code: string
   name: string
-  account_type: AccountType
-  account_sub_type: AccountSubType
+  type: AccountType  // DB uses 'type'
+  sub_type?: AccountSubType | null  // DB uses 'sub_type'
+  account_type?: AccountType  // Legacy alias
+  account_sub_type?: AccountSubType  // Legacy alias
   parent_id: string | null
   is_system: boolean
   is_active: boolean
-  description: string | null
+  description?: string | null
   opening_balance: number
   created_at: string
-  updated_at: string
+  updated_at?: string
+  // Runtime computed
+  current_balance?: number
 }
 
 export interface Party {
@@ -58,29 +62,36 @@ export interface Party {
 export interface JournalEntry {
   id: string
   company_id: string
-  entry_number: string
-  entry_date: string
-  narration: string | null
-  reference: string | null
-  status: JournalStatus
-  source: string | null
-  ai_generated: boolean
-  document_id: string | null
-  created_by: string
+  date: string
+  description: string
+  reference_number?: string | null
+  document_id?: string | null
+  created_by?: string | null
+  created_by_ai?: boolean
+  is_opening_balance?: boolean
   created_at: string
-  updated_at: string
   lines?: JournalLine[]
+  // Legacy aliases
+  entry_number?: string
+  entry_date?: string
+  narration?: string | null
+  reference?: string | null
+  status?: JournalStatus
+  total_debit?: number
+  // Join fields
+  creator?: { full_name: string | null; email: string | null }
 }
 
 export interface JournalLine {
   id: string
   journal_entry_id: string
   account_id: string
-  party_id: string | null
-  description: string | null
+  party_id?: string | null
+  description?: string | null
+  narration?: string | null  // DB uses narration
   debit: number
   credit: number
-  created_at: string
+  created_at?: string
   account?: Account
   party?: Party
 }
@@ -89,27 +100,21 @@ export interface Document {
   id: string
   company_id: string
   file_name: string
-  file_path: string
-  file_type: string
-  file_size: number
-  ocr_status: "pending" | "processing" | "completed" | "failed"
-  ocr_data: Record<string, unknown> | null
-  extracted_data: {
-    vendor_name?: string
-    invoice_number?: string
-    invoice_date?: string
-    total_amount?: number
-    tax_amount?: number
-    line_items?: Array<{
-      description: string
-      quantity?: number
-      rate?: number
-      amount: number
-    }>
-  } | null
-  uploaded_by: string
-  created_at: string
-  updated_at: string
+  file_type: string | null
+  storage_path: string
+  file_size_bytes: number
+  ocr_status: "pending" | "processing" | "complete" | "completed" | "failed" | null
+  ocr_extracted_data?: Record<string, unknown> | null
+  journal_entry_id?: string | null
+  uploaded_by?: string | null
+  uploaded_at: string
+  // Legacy aliases
+  name?: string
+  type?: string
+  file_size?: number
+  created_at?: string
+  mime_type?: string
+  ocr_data?: Record<string, unknown> | null
 }
 
 export interface ChatMessage {
@@ -205,15 +210,12 @@ export interface LedgerRow {
 }
 
 export interface DashboardKPIs {
-  total_assets: number
-  total_liabilities: number
-  total_equity: number
-  total_income: number
+  total_revenue: number
   total_expenses: number
   net_income: number
   total_receivables: number
   total_payables: number
   cash_balance: number
-  journal_entries_count: number
-  ai_queries_used: number
+  revenue_growth: number
+  expense_growth: number
 }

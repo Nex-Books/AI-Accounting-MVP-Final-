@@ -48,7 +48,7 @@ async function getDashboardData(companyId: string) {
     .gte('journal.date', sixMonthsAgo.toISOString().split('T')[0])
   
   return {
-    kpis: kpis || {
+    kpis: (kpis || {
       total_revenue: 0,
       total_expenses: 0,
       net_income: 0,
@@ -57,9 +57,9 @@ async function getDashboardData(companyId: string) {
       cash_balance: 0,
       revenue_growth: 0,
       expense_growth: 0,
-    },
+    }) as import('@/lib/types').DashboardKPIs,
     recentJournals: recentJournals || [],
-    monthlyData: monthlyData || [],
+    monthlyData: monthlyData as unknown as Array<{ credit: number; debit: number; account: { type: string }; journal: { date: string } }>,
   }
 }
 
