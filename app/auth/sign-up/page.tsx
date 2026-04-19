@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react'
 
 export const metadata = {
   title: 'Sign Up',
-  description: 'Create your ElevAIte Books account and start your free trial',
+  description: 'Create your NexBooks account and start your free trial',
 }
 
 export default function SignUpPage() {

@@ -42,10 +42,9 @@ async function getDashboardData(companyId: string) {
       credit,
       debit,
       account:accounts!inner(type),
-      journal:journal_entries!inner(date, status, company_id)
+      journal:journal_entries!inner(date, company_id)
     `)
     .eq('journal.company_id', companyId)
-    .eq('journal.status', 'posted')
     .gte('journal.date', sixMonthsAgo.toISOString().split('T')[0])
   
   return {

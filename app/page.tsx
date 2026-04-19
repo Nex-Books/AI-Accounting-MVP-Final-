@@ -42,8 +42,8 @@ export default function HomePage() {
             <span className="text-accent">AI assistance</span>
           </h1>
           <p className="mb-8 text-lg text-muted-foreground text-balance">
-            ElevAIte Books combines powerful double-entry accounting with intelligent
-            AI to help you manage your finances effortlessly. GST compliant, 
+            NexBooks combines powerful double-entry accounting with intelligent
+            AI to help you manage your finances effortlessly. GST compliant,
             India-first, and incredibly easy to use.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -162,7 +162,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="mb-4 text-3xl font-bold">Ready to simplify your accounting?</h2>
           <p className="mb-8 text-primary-foreground/80">
-            Join thousands of Indian businesses using ElevAIte Books.
+            Join thousands of Indian businesses using NexBooks.
           </p>
           <Button size="lg" variant="secondary" asChild>
             <Link href="/auth/sign-up">
@@ -176,7 +176,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 text-sm text-muted-foreground sm:flex-row">
-          <p>&copy; {new Date().getFullYear()} ElevAIte Books. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} NexBooks. All rights reserved.</p>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
             <Link href="/terms" className="hover:text-foreground">Terms</Link>

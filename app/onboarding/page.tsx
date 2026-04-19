@@ -4,7 +4,7 @@ import { OnboardingWizard } from './onboarding-wizard'
 
 export const metadata = {
   title: 'Setup Your Company',
-  description: 'Complete your company setup to start using ElevAIte Books',
+  description: 'Complete your company setup to start using NexBooks',
 }
 
 export default async function OnboardingPage() {

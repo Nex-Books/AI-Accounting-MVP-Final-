@@ -15,9 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { formatCurrency, getInitials } from '@/lib/format'
+import { formatCurrency, getInitials, validateGSTIN, validatePAN } from '@/lib/format'
 import type { Company, User } from '@/lib/types'
-import { Building2, Users, CreditCard, Shield, Sparkles, Check } from 'lucide-react'
+import { Building2, Users, CreditCard, Shield, Sparkles, Check, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface SettingsTabsProps {
   company: Company
@@ -114,6 +115,44 @@ export function SettingsTabs({ company, user, isOwner }: SettingsTabsProps) {
 }
 
 function CompanySettings({ company, isOwner }: { company: Company; isOwner: boolean }) {
+  const [name, setName] = useState(company.name)
+  const [gstin, setGstin] = useState(company.gstin || '')
+  const [pan, setPan] = useState(company.pan || '')
+  const [businessType, setBusinessType] = useState(company.business_type || '')
+  const [fiscalYearStart, setFiscalYearStart] = useState(company.fiscal_year_start || '04-01')
+  const [saving, setSaving] = useState(false)
+
+  async function handleSave() {
+    const gstinErr = validateGSTIN(gstin)
+    const panErr = validatePAN(pan)
+    if (gstinErr) { toast.error(gstinErr); return }
+    if (panErr) { toast.error(panErr); return }
+
+    setSaving(true)
+    try {
+      const res = await fetch('/api/company', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          gstin: gstin || null,
+          pan: pan || null,
+          business_type: businessType || null,
+          fiscal_year_start: fiscalYearStart,
+        }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Save failed')
+      }
+      toast.success('Company settings saved')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save settings')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -126,7 +165,7 @@ function CompanySettings({ company, isOwner }: { company: Company; isOwner: bool
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Company Name</Label>
-            <Input defaultValue={company.name} disabled={!isOwner} />
+            <Input value={name} onChange={e => setName(e.target.value)} disabled={!isOwner} />
           </div>
           <div className="space-y-2">
             <Label>Company Slug</Label>
@@ -137,18 +176,20 @@ function CompanySettings({ company, isOwner }: { company: Company; isOwner: bool
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>GSTIN</Label>
-            <Input defaultValue={company.gstin || ''} placeholder="Not set" disabled={!isOwner} />
+            <Input value={gstin} onChange={e => setGstin(e.target.value.toUpperCase())} placeholder="22AAAAA0000A1Z5" maxLength={15} disabled={!isOwner} />
+            {gstin && validateGSTIN(gstin) && <p className="text-xs text-destructive">{validateGSTIN(gstin)}</p>}
           </div>
           <div className="space-y-2">
             <Label>PAN</Label>
-            <Input defaultValue={company.pan || ''} placeholder="Not set" disabled={!isOwner} />
+            <Input value={pan} onChange={e => setPan(e.target.value.toUpperCase())} placeholder="AAAAA0000A" maxLength={10} disabled={!isOwner} />
+            {pan && validatePAN(pan) && <p className="text-xs text-destructive">{validatePAN(pan)}</p>}
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Business Type</Label>
-            <Input defaultValue={company.business_type || ''} placeholder="Not set" disabled={!isOwner} />
+            <Input value={businessType} onChange={e => setBusinessType(e.target.value)} placeholder="Not set" disabled={!isOwner} />
           </div>
           <div className="space-y-2">
             <Label>Base Currency</Label>
@@ -158,7 +199,7 @@ function CompanySettings({ company, isOwner }: { company: Company; isOwner: bool
 
         <div className="space-y-2">
           <Label>Fiscal Year Start</Label>
-          <Select defaultValue={company.fiscal_year_start || '04-01'} disabled={!isOwner}>
+          <Select value={fiscalYearStart} onValueChange={setFiscalYearStart} disabled={!isOwner}>
             <SelectTrigger className="w-64">
               <SelectValue />
             </SelectTrigger>
@@ -170,7 +211,10 @@ function CompanySettings({ company, isOwner }: { company: Company; isOwner: bool
         </div>
 
         {isOwner && (
-          <Button>Save Changes</Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save Changes
+          </Button>
         )}
       </CardContent>
     </Card>
@@ -218,6 +262,33 @@ function TeamSettings({ company, user, isOwner }: { company: Company; user: User
 
 function BillingSettings({ company, isOwner }: { company: Company; isOwner: boolean }) {
   const currentPlan = plans.find(p => p.name.toLowerCase() === company.plan) || plans[0]
+  const [upgrading, setUpgrading] = useState<string | null>(null)
+
+  async function handleUpgrade(planName: string) {
+    const planKey = planName.toLowerCase()
+    if (!['essentials', 'professional', 'enterprise'].includes(planKey)) return
+    setUpgrading(planKey)
+    try {
+      const res = await fetch('/api/billing/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planKey }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Subscription failed')
+
+      // If Razorpay returns a short URL, redirect there for payment
+      if (data.shortUrl) {
+        window.location.href = data.shortUrl
+      } else {
+        toast.success('Subscription initiated! Complete payment to activate.')
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to start subscription')
+    } finally {
+      setUpgrading(null)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -287,10 +358,13 @@ function BillingSettings({ company, isOwner }: { company: Company; isOwner: bool
                   {plan.name.toLowerCase() === company.plan ? (
                     <Badge className="mt-4 w-full justify-center">Current Plan</Badge>
                   ) : (
-                    <Button 
-                      variant={plan.price > 0 ? 'default' : 'outline'} 
+                    <Button
+                      variant={plan.price > 0 ? 'default' : 'outline'}
                       className="mt-4 w-full"
+                      disabled={upgrading === plan.name.toLowerCase()}
+                      onClick={() => plan.price > 0 ? handleUpgrade(plan.name) : undefined}
                     >
+                      {upgrading === plan.name.toLowerCase() && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       {plan.price === 0 ? 'Downgrade' : 'Upgrade'}
                     </Button>
                   )}

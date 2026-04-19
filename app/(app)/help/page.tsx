@@ -37,7 +37,7 @@ const faqs = [
   },
   {
     question: 'How do I track GST?',
-    answer: 'ElevAIte Books has pre-configured GST accounts (CGST, SGST, IGST Payable). When recording taxable transactions, create separate lines for the tax amounts. The AI Assistant can help calculate and record GST automatically.',
+    answer: 'NexBooks has pre-configured GST accounts (CGST, SGST, IGST Payable). When recording taxable transactions, create separate lines for the tax amounts. The AI Assistant can help calculate and record GST automatically.',
   },
   {
     question: 'Can I void or edit a posted entry?',
@@ -60,7 +60,7 @@ const faqs = [
 const guides = [
   {
     title: 'Getting Started',
-    description: 'Learn the basics of ElevAIte Books',
+    description: 'Learn the basics of NexBooks',
     icon: BookOpen,
     href: '#',
   },
@@ -130,7 +130,7 @@ export default function HelpPage() {
               Contact our support team directly
             </p>
             <Button variant="outline" size="sm" asChild>
-              <a href="mailto:support@elevaite.app">
+              <a href="mailto:connect@nexbooks.co.in">
                 Send Email
                 <ExternalLink className="ml-2 h-3 w-3" />
               </a>
@@ -191,7 +191,7 @@ export default function HelpPage() {
         <CardHeader>
           <CardTitle>Frequently Asked Questions</CardTitle>
           <CardDescription>
-            Common questions about using ElevAIte Books
+            Common questions about using NexBooks
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -220,9 +220,9 @@ export default function HelpPage() {
             </p>
             <div className="flex justify-center gap-3">
               <Button variant="outline" asChild>
-                <a href="mailto:support@elevaite.app">
+                <a href="mailto:connect@nexbooks.co.in">
                   <Mail className="mr-2 h-4 w-4" />
-                  support@elevaite.app
+                  connect@nexbooks.co.in
                 </a>
               </Button>
             </div>

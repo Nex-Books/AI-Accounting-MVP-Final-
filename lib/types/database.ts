@@ -1,4 +1,4 @@
-// Database types for ElevAIte Books
+// Database types for NexBooks
 
 export type AccountType = "asset" | "liability" | "equity" | "income" | "expense"
 export type AccountSubType =
