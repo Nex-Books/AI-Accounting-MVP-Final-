@@ -27,7 +27,7 @@ async function getAccounts(companyId: string): Promise<Account[]> {
     .eq('is_active', true)
     .order('code')
   
-  return data || []
+  return (data || []) as unknown as Account[]
 }
 
 async function getLedgerData(

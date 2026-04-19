@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useChat, type UseChatOptions } from '@ai-sdk/react'
+import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type UIMessage } from 'ai'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -97,7 +97,7 @@ export function ChatInterface({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const chatOptions: UseChatOptions = {
+  const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/chat',
       prepareSendMessagesRequest: ({ messages }) => ({
@@ -115,9 +115,7 @@ export function ChatInterface({
         },
       }),
     }),
-  }
-
-  const { messages, sendMessage, status, error } = useChat(chatOptions)
+  })
 
   const isLoading = status === 'streaming' || status === 'submitted'
   const remainingQueries = queriesLimit - queriesUsed
@@ -477,7 +475,8 @@ function MessageBubble({
 }) {
   const isUser = message.role === 'user'
   const text = getMessageText(message)
-  const toolCalls = message.parts?.filter(p => p.type === 'tool-invocation') || []
+  // In AI SDK 6, tool parts have types like 'tool-create_journal_entry'
+  const toolCalls = message.parts?.filter(p => (p.type as string).startsWith('tool-')) || []
 
   return (
     <div className={cn('flex items-start gap-3', isUser && 'flex-row-reverse')}>
@@ -505,12 +504,13 @@ function MessageBubble({
 
         {/* Tool Results */}
         {toolCalls.map((tool, index) => {
-          if (tool.type !== 'tool-invocation') return null
-          
-          const toolResult = tool.state === 'output-available' ? tool.output : null
+          const toolPart = tool as { type: string; state?: string; output?: unknown; input?: unknown }
+          const toolType = toolPart.type
+          const toolName = toolType.replace('tool-', '')
+          const toolResult = toolPart.state === 'output-available' ? toolPart.output : null
           
           // Journal Entry Creation
-          if (tool.toolName === 'create_journal_entry' && toolResult) {
+          if (toolName === 'create_journal_entry' && toolResult) {
             const result = toolResult as { success: boolean; referenceNumber?: string; entryId?: string; error?: string; message?: string; amount?: number }
             
             return (
@@ -546,7 +546,7 @@ function MessageBubble({
           }
 
           // Document Analysis
-          if (tool.toolName === 'analyze_document' && toolResult) {
+          if (toolName === 'analyze_document' && toolResult) {
             const result = toolResult as { success: boolean; summary?: string; extractedData?: Record<string, unknown>; suggestedEntry?: unknown; error?: string }
             
             return (
@@ -575,7 +575,7 @@ function MessageBubble({
           }
 
           // Financial Summary
-          if (tool.toolName === 'get_financial_summary' && toolResult) {
+          if (toolName === 'get_financial_summary' && toolResult) {
             const result = toolResult as { formatted?: { assets: string; liabilities: string; netWorth: string; income: string; expenses: string; netProfit: string }; message?: string }
             
             if (result.message) {
@@ -613,7 +613,7 @@ function MessageBubble({
           }
 
           // GST Calculation
-          if (tool.toolName === 'calculate_gst' && toolResult) {
+          if (toolName === 'calculate_gst' && toolResult) {
             const result = toolResult as { gstRate: string; formatted: { base: string; gst: string; total: string }; cgst: number; sgst: number }
             
             return (
@@ -645,15 +645,15 @@ function MessageBubble({
           }
 
           // Loading state
-          if (tool.state === 'input-streaming' || tool.state === 'input-available') {
+          if (toolPart.state === 'input-streaming' || toolPart.state === 'input-available') {
             return (
               <Card key={index} className="inline-flex items-center gap-2 p-3 bg-muted/50">
                 <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">
-                  {tool.toolName === 'create_journal_entry' ? 'Creating entry...' : 
-                   tool.toolName === 'get_financial_summary' ? 'Analyzing finances...' :
-                   tool.toolName === 'calculate_gst' ? 'Calculating...' :
-                   tool.toolName === 'analyze_document' ? 'Analyzing document...' :
+                  {toolName === 'create_journal_entry' ? 'Creating entry...' : 
+                   toolName === 'get_financial_summary' ? 'Analyzing finances...' :
+                   toolName === 'calculate_gst' ? 'Calculating...' :
+                   toolName === 'analyze_document' ? 'Analyzing document...' :
                    'Processing...'}
                 </span>
               </Card>

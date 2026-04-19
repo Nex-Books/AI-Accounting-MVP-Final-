@@ -1,5 +1,4 @@
 import { streamText, tool, convertToModelMessages } from 'ai'
-import { openai } from '@ai-sdk/openai'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { PLAN_LIMITS, type PlanTier } from '@/lib/types'
