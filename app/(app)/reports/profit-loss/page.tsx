@@ -16,34 +16,28 @@ interface ProfitLossData {
 
 async function getProfitLossData(companyId: string): Promise<ProfitLossData> {
   const supabase = await createClient()
-  
+
   const { data } = await supabase
     .from('profit_loss')
     .select('*')
     .eq('company_id', companyId)
-  
+
   const revenues: Array<{ account_name: string; amount: number }> = []
   const expenses: Array<{ account_name: string; amount: number }> = []
   let totalRevenue = 0
   let totalExpenses = 0
-  
+
   data?.forEach((row) => {
-    if (row.category === 'revenue') {
-      revenues.push({ account_name: row.account_name, amount: row.amount })
-      totalRevenue += row.amount
-    } else {
-      expenses.push({ account_name: row.account_name, amount: row.amount })
-      totalExpenses += row.amount
+    if (row.category === 'income') {
+      revenues.push({ account_name: row.account_name, amount: Number(row.amount) })
+      totalRevenue += Number(row.amount)
+    } else if (row.category === 'expense') {
+      expenses.push({ account_name: row.account_name, amount: Number(row.amount) })
+      totalExpenses += Number(row.amount)
     }
   })
-  
-  return {
-    revenues,
-    expenses,
-    totalRevenue,
-    totalExpenses,
-    netIncome: totalRevenue - totalExpenses,
-  }
+
+  return { revenues, expenses, totalRevenue, totalExpenses, netIncome: totalRevenue - totalExpenses }
 }
 
 export default async function ProfitLossPage() {

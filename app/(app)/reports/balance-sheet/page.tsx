@@ -60,23 +60,26 @@ export default function BalanceSheetPage() {
       .eq('company_id', companyId)
 
     // Filter lines by date and calculate balances
-    const balanceMap = new Map<string, number>()
+    const debitMap  = new Map<string, number>()
+    const creditMap = new Map<string, number>()
     for (const line of (lines || [])) {
       const entryDate = (line.journal_entry as any)?.date
       if (entryDate && entryDate <= asOfDate) {
-        const current = balanceMap.get(line.account_id) || 0
-        balanceMap.set(line.account_id, current + (line.debit || 0) - (line.credit || 0))
+        debitMap.set(line.account_id,  (debitMap.get(line.account_id)  || 0) + (line.debit  || 0))
+        creditMap.set(line.account_id, (creditMap.get(line.account_id) || 0) + (line.credit || 0))
       }
     }
 
-    // Build rows
+    // Build rows — assets/expense: Dr-Cr increases; liabilities/equity: Cr-Dr increases
     const rows: BalanceRow[] = (accounts || [])
-      .map(acc => ({
-        code: acc.code,
-        name: acc.name,
-        type: acc.type,
-        balance: balanceMap.get(acc.id) || 0,
-      }))
+      .map(acc => {
+        const dr = debitMap.get(acc.id) || 0
+        const cr = creditMap.get(acc.id) || 0
+        const balance = (acc.type === 'asset')
+          ? dr - cr
+          : cr - dr
+        return { code: acc.code, name: acc.name, type: acc.type, balance }
+      })
       .filter(r => Math.abs(r.balance) > 0.01)
 
     setAssets(rows.filter(r => r.type === 'asset'))
