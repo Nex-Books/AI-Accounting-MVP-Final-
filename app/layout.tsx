@@ -9,8 +9,8 @@ const _jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mo
 
 export const metadata: Metadata = {
   title: {
-    default: 'ElevAIte Books - AI-Powered Accounting',
-    template: '%s | ElevAIte Books',
+    default: 'NexBooks - AI-Powered Accounting',
+    template: '%s | NexBooks',
   },
   description: 'Modern AI-powered accounting platform for Indian businesses. GST compliant bookkeeping with intelligent automation.',
   keywords: ['accounting', 'bookkeeping', 'GST', 'AI', 'India', 'finance'],

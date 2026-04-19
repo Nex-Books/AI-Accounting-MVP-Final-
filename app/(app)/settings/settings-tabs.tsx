@@ -17,7 +17,8 @@ import {
 } from '@/components/ui/select'
 import { formatCurrency, getInitials } from '@/lib/format'
 import type { Company, User } from '@/lib/types'
-import { Building2, Users, CreditCard, Shield, Sparkles, Check } from 'lucide-react'
+import { Building2, Users, CreditCard, Shield, Sparkles, Check, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface SettingsTabsProps {
   company: Company
@@ -114,6 +115,39 @@ export function SettingsTabs({ company, user, isOwner }: SettingsTabsProps) {
 }
 
 function CompanySettings({ company, isOwner }: { company: Company; isOwner: boolean }) {
+  const [name, setName] = useState(company.name)
+  const [gstin, setGstin] = useState(company.gstin || '')
+  const [pan, setPan] = useState(company.pan || '')
+  const [businessType, setBusinessType] = useState(company.business_type || '')
+  const [fiscalYearStart, setFiscalYearStart] = useState(company.fiscal_year_start || '04-01')
+  const [saving, setSaving] = useState(false)
+
+  async function handleSave() {
+    setSaving(true)
+    try {
+      const res = await fetch('/api/company', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          gstin: gstin || null,
+          pan: pan || null,
+          business_type: businessType || null,
+          fiscal_year_start: fiscalYearStart,
+        }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Save failed')
+      }
+      toast.success('Company settings saved')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save settings')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -126,7 +160,7 @@ function CompanySettings({ company, isOwner }: { company: Company; isOwner: bool
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Company Name</Label>
-            <Input defaultValue={company.name} disabled={!isOwner} />
+            <Input value={name} onChange={e => setName(e.target.value)} disabled={!isOwner} />
           </div>
           <div className="space-y-2">
             <Label>Company Slug</Label>
@@ -137,18 +171,18 @@ function CompanySettings({ company, isOwner }: { company: Company; isOwner: bool
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>GSTIN</Label>
-            <Input defaultValue={company.gstin || ''} placeholder="Not set" disabled={!isOwner} />
+            <Input value={gstin} onChange={e => setGstin(e.target.value)} placeholder="Not set" disabled={!isOwner} />
           </div>
           <div className="space-y-2">
             <Label>PAN</Label>
-            <Input defaultValue={company.pan || ''} placeholder="Not set" disabled={!isOwner} />
+            <Input value={pan} onChange={e => setPan(e.target.value)} placeholder="Not set" disabled={!isOwner} />
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Business Type</Label>
-            <Input defaultValue={company.business_type || ''} placeholder="Not set" disabled={!isOwner} />
+            <Input value={businessType} onChange={e => setBusinessType(e.target.value)} placeholder="Not set" disabled={!isOwner} />
           </div>
           <div className="space-y-2">
             <Label>Base Currency</Label>
@@ -158,7 +192,7 @@ function CompanySettings({ company, isOwner }: { company: Company; isOwner: bool
 
         <div className="space-y-2">
           <Label>Fiscal Year Start</Label>
-          <Select defaultValue={company.fiscal_year_start || '04-01'} disabled={!isOwner}>
+          <Select value={fiscalYearStart} onValueChange={setFiscalYearStart} disabled={!isOwner}>
             <SelectTrigger className="w-64">
               <SelectValue />
             </SelectTrigger>
@@ -170,7 +204,10 @@ function CompanySettings({ company, isOwner }: { company: Company; isOwner: bool
         </div>
 
         {isOwner && (
-          <Button>Save Changes</Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save Changes
+          </Button>
         )}
       </CardContent>
     </Card>

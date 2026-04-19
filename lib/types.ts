@@ -1,15 +1,15 @@
-// Database types for ElevAIte Books
+// Database types for NexBooks
 
-export type AccountType = 'asset' | 'liability' | 'equity' | 'revenue' | 'expense'
-export type AccountSubType = 
+export type AccountType = 'asset' | 'liability' | 'equity' | 'income' | 'expense'
+export type AccountSubType =
   | 'current_asset' | 'fixed_asset' | 'other_asset'
   | 'current_liability' | 'long_term_liability'
   | 'owner_equity' | 'retained_earnings'
-  | 'operating_revenue' | 'other_revenue'
+  | 'operating_income' | 'other_income'
   | 'cost_of_goods' | 'operating_expense' | 'other_expense'
 
 export type UserRole = 'owner' | 'accountant' | 'viewer'
-export type PlanTier = 'essentials' | 'professional' | 'enterprise'
+export type PlanTier = 'free' | 'essentials' | 'professional' | 'enterprise'
 export type JournalStatus = 'draft' | 'posted' | 'voided'
 export type PartyType = 'customer' | 'vendor' | 'both'
 export type DocumentType = 'invoice' | 'receipt' | 'bill' | 'contract' | 'other'
@@ -202,7 +202,7 @@ export interface BalanceSheetRow {
 }
 
 export interface ProfitLossRow {
-  category: 'revenue' | 'expense'
+  category: 'income' | 'expense'
   account_name: string
   amount: number
 }
@@ -288,6 +288,15 @@ export const PLAN_LIMITS: Record<PlanTier, {
   price: number          // Monthly price in INR
   name: string           // Display name
 }> = {
+  free: {
+    transactions: 50,
+    queries: 10,
+    documents: 10,
+    storageBytes: 104857600, // 100 MB
+    users: 1,
+    price: 0,
+    name: 'Free',
+  },
   essentials: {
     transactions: 200,
     queries: 50,

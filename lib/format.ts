@@ -1,4 +1,4 @@
-// Formatting utilities for ElevAIte Books
+// Formatting utilities for NexBooks
 
 /**
  * Format a number as Indian currency (INR)
@@ -119,7 +119,7 @@ export function getAccountTypeLabel(type: string): string {
     asset: 'Assets',
     liability: 'Liabilities',
     equity: 'Equity',
-    revenue: 'Revenue',
+    income: 'Income',
     expense: 'Expenses',
   }
   return labels[type] || type
@@ -137,8 +137,8 @@ export function getAccountSubTypeLabel(subType: string): string {
     long_term_liability: 'Long-term Liabilities',
     owner_equity: "Owner's Equity",
     retained_earnings: 'Retained Earnings',
-    operating_revenue: 'Operating Revenue',
-    other_revenue: 'Other Revenue',
+    operating_income: 'Operating Income',
+    other_income: 'Other Income',
     cost_of_goods: 'Cost of Goods Sold',
     operating_expense: 'Operating Expenses',
     other_expense: 'Other Expenses',

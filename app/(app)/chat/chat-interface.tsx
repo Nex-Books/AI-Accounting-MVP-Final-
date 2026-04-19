@@ -253,7 +253,7 @@ export function ChatInterface({
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center mb-6">
               <Sparkles className="w-10 h-10 text-white" />
             </div>
-            <h2 className="text-2xl font-bold mb-2">ElevAIte Assistant</h2>
+            <h2 className="text-2xl font-bold mb-2">NexBooks AI Assistant</h2>
             <p className="text-muted-foreground max-w-lg mb-4">
               I&apos;m your AI accountant. Tell me about transactions and I&apos;ll record them instantly. 
               Upload documents and I&apos;ll extract the data automatically.
