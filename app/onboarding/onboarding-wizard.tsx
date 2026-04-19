@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { validateGSTIN, validatePAN } from '@/lib/format'
 
 interface OnboardingWizardProps {
   userId: string
@@ -166,9 +167,9 @@ export function OnboardingWizard({ userId, userEmail, userName }: OnboardingWiza
         { code: '2200', name: 'TDS Payable', type: 'liability', sub_type: 'current_liability' },
         { code: '3000', name: "Owner's Capital", type: 'equity', sub_type: 'owner_equity' },
         { code: '3100', name: 'Retained Earnings', type: 'equity', sub_type: 'retained_earnings' },
-        { code: '4000', name: 'Sales Revenue', type: 'revenue', sub_type: 'operating_revenue' },
-        { code: '4100', name: 'Service Revenue', type: 'revenue', sub_type: 'operating_revenue' },
-        { code: '4200', name: 'Other Income', type: 'revenue', sub_type: 'other_income' },
+        { code: '4000', name: 'Sales Revenue', type: 'income', sub_type: 'operating_income' },
+        { code: '4100', name: 'Service Revenue', type: 'income', sub_type: 'operating_income' },
+        { code: '4200', name: 'Other Income', type: 'income', sub_type: 'other_income' },
         { code: '5000', name: 'Purchases', type: 'expense', sub_type: 'cost_of_goods' },
         { code: '5100', name: 'Direct Expenses', type: 'expense', sub_type: 'cost_of_goods' },
         { code: '6000', name: 'Rent Expense', type: 'expense', sub_type: 'operating_expense' },
@@ -338,15 +339,26 @@ export function OnboardingWizard({ userId, userEmail, userName }: OnboardingWiza
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="gstin">GSTIN</Label>
+                    <Label htmlFor="gstin">GSTIN <span className="text-muted-foreground text-xs">(optional)</span></Label>
                     <Input id="gstin" value={gstin} onChange={e => setGstin(e.target.value.toUpperCase())} placeholder="22AAAAA0000A1Z5" maxLength={15} />
+                    {gstin && validateGSTIN(gstin) && (
+                      <p className="text-xs text-destructive">{validateGSTIN(gstin)}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="pan">PAN</Label>
+                    <Label htmlFor="pan">PAN <span className="text-muted-foreground text-xs">(optional)</span></Label>
                     <Input id="pan" value={pan} onChange={e => setPan(e.target.value.toUpperCase())} placeholder="AAAAA0000A" maxLength={10} />
+                    {pan && validatePAN(pan) && (
+                      <p className="text-xs text-destructive">{validatePAN(pan)}</p>
+                    )}
                   </div>
                 </div>
-                <Button className="w-full" onClick={() => { setError(null); setStep(2) }} disabled={!companyName.trim()}>
+                <Button className="w-full" onClick={() => {
+                  setError(null)
+                  if (gstin && validateGSTIN(gstin)) { setError(validateGSTIN(gstin)); return }
+                  if (pan && validatePAN(pan)) { setError(validatePAN(pan)); return }
+                  setStep(2)
+                }} disabled={!companyName.trim()}>
                   Continue <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>

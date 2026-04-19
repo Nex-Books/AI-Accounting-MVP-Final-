@@ -208,3 +208,25 @@ export function getRelativeTime(date: string | Date): string {
   if (diffDays < 7) return `${diffDays}d ago`
   return formatDate(d, 'short')
 }
+
+// GSTIN: 15-char format — 2-digit state code + 10-char PAN + entity number + check digit
+const GSTIN_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/
+
+export function validateGSTIN(gstin: string): string | null {
+  if (!gstin) return null
+  const clean = gstin.trim().toUpperCase()
+  if (clean.length !== 15) return 'GSTIN must be 15 characters'
+  if (!GSTIN_REGEX.test(clean)) return 'Invalid GSTIN format (e.g. 22AAAAA0000A1Z5)'
+  return null
+}
+
+// PAN: 10 chars — 5 letters + 4 digits + 1 letter
+const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/
+
+export function validatePAN(pan: string): string | null {
+  if (!pan) return null
+  const clean = pan.trim().toUpperCase()
+  if (clean.length !== 10) return 'PAN must be 10 characters'
+  if (!PAN_REGEX.test(clean)) return 'Invalid PAN format (e.g. AAAAA0000A)'
+  return null
+}
