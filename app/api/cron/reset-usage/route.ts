@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  // Reset monthly usage counters for active subscriptions
+  // Reset monthly usage counters for all companies (free + paid)
   const { error } = await supabase
     .from('companies')
     .update({
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       ai_queries_used_month: 0,
       docs_uploaded_month: 0,
     })
-    .in('plan_status', ['active'])
+    .not('id', 'is', null) // match all rows
 
   if (error) {
     return Response.json({ success: false, error: error.message }, { status: 500 })

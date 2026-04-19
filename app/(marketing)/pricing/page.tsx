@@ -141,7 +141,7 @@ export default function PricingPage() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-primary flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold">ElevAIte Books</span>
+            <span className="text-xl font-bold">NexBooks</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/auth/login">
@@ -355,7 +355,7 @@ export default function PricingPage() {
       {/* Footer */}
       <footer className="border-t mt-24 py-12">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2024 ElevAIte Books. All rights reserved.</p>
+          <p>© 2024 NexBooks. All rights reserved.</p>
         </div>
       </footer>
     </div>

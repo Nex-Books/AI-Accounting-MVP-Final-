@@ -61,9 +61,8 @@ export function Logo({
       
       {showText && (
         <div className={cn('font-semibold tracking-tight', textSizes[size], colorClasses[variant])}>
-          <span>Elev</span>
-          <span className="text-accent">AI</span>
-          <span>te</span>
+          <span>Nex</span>
+          <span className="text-accent">Books</span>
         </div>
       )}
     </div>

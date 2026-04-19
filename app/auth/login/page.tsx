@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react'
 
 export const metadata = {
   title: 'Sign In',
-  description: 'Sign in to your ElevAIte Books account',
+  description: 'Sign in to your NexBooks account',
 }
 
 export default function LoginPage() {
