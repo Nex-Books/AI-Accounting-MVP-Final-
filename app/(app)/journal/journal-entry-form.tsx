@@ -167,12 +167,13 @@ export function JournalEntryForm({
 
       // Insert lines
       const linesData = validLines.map(l => ({
+        company_id: companyId,
         journal_entry_id: entryId,
         account_id: l.account_id,
         party_id: l.party_id || null,
         debit: parseFloat(l.debit) || 0,
         credit: parseFloat(l.credit) || 0,
-        description: l.description || null,
+        narration: l.description || null,
       }))
 
       const { error: linesError } = await supabase
@@ -319,15 +320,15 @@ export function JournalEntryForm({
 
                 <div className="col-span-2">
                   <Select
-                    value={line.party_id}
-                    onValueChange={(value) => updateLine(line.id, 'party_id', value)}
+                    value={line.party_id || "none"}
+                    onValueChange={(value) => updateLine(line.id, 'party_id', value === 'none' ? '' : value)}
                     disabled={isLoading}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Optional" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {parties.map((p) => (
                         <SelectItem key={p.id} value={p.id}>
                           {p.name}

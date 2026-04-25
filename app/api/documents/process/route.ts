@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import OpenAI from 'openai'
+import { GoogleGenAI } from '@google/genai'
 import * as XLSX from 'xlsx'
 
 export async function POST(request: Request) {
@@ -39,33 +39,37 @@ export async function POST(request: Request) {
         rows: jsonData,
       }
     }
-    // Image processing with OpenAI Vision (PNG, JPG, JPEG, GIF, WEBP)
-    else if (fileName.match(/\.(png|jpg|jpeg|gif|webp)$/)) {
+    // Image and PDF processing with Gemini 2.5 Flash
+    else if (fileName.match(/\.(png|jpg|jpeg|gif|webp|pdf)$/)) {
       const base64 = fileBuffer.toString('base64')
       let mediaType = 'image/png'
       if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) mediaType = 'image/jpeg'
       else if (fileName.endsWith('.gif')) mediaType = 'image/gif'
       else if (fileName.endsWith('.webp')) mediaType = 'image/webp'
-
-      const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+      else if (fileName.endsWith('.pdf')) mediaType = 'application/pdf'
 
       try {
-        const ocrResponse = await openaiClient.chat.completions.create({
-          model: 'gpt-4o',
-          max_tokens: 1500,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'image_url', image_url: { url: `data:${mediaType};base64,${base64}` } },
-              {
-                type: 'text',
-                text: `Extract from this invoice or receipt. Return ONLY a valid JSON object with keys: vendor (string), date (YYYY-MM-DD string), invoice_number (string or null), total (number), subtotal (number or null), tax (number or null), tax_rate (string or null), currency (default INR), line_items (array of {description, quantity, unit_price, amount}), payment_mode (string or null). Use null for any field not found.`,
-              },
-            ],
-          }],
+        const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY })
+
+        const ocrResponse = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                { text: `Extract from this invoice, bill, or bank statement. Return ONLY a valid JSON object with keys: vendor (string), date (YYYY-MM-DD string), invoice_number (string or null), total (number), subtotal (number or null), tax (number or null), tax_rate (string or null), currency (default INR), line_items (array of {description, quantity, unit_price, amount}), payment_mode (string or null). Use null for any field not found.` },
+                {
+                  inlineData: {
+                    data: base64,
+                    mimeType: mediaType,
+                  },
+                },
+              ],
+            },
+          ],
         })
 
-        const content = ocrResponse.choices[0]?.message?.content || '{}'
+        const content = ocrResponse.text || '{}'
         try {
           const jsonMatch = content.match(/\{[\s\S]*\}/)
           extractedData = jsonMatch ? JSON.parse(jsonMatch[0]) : { raw: content, parseError: true }
@@ -78,57 +82,7 @@ export async function POST(request: Request) {
             .eq('id', documentId).eq('company_id', companyId)
         }
       } catch (ocrError: unknown) {
-        const errorMessage = ocrError instanceof Error ? ocrError.message : 'OCR failed'
-        if (documentId) {
-          await supabase.from('documents').update({ ocr_status: 'failed' }).eq('id', documentId).eq('company_id', companyId)
-        }
-        return Response.json({ error: errorMessage, ocrFailed: true }, { status: 500 })
-      }
-    }
-    // PDF processing via OpenAI Files API
-    else if (fileName.endsWith('.pdf')) {
-      const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-
-      try {
-        // Upload PDF to OpenAI Files API
-        const blob = new Blob([fileBuffer], { type: 'application/pdf' })
-        const uploadedFile = await openaiClient.files.create({
-          file: new File([blob], file.name, { type: 'application/pdf' }),
-          purpose: 'user_data',
-        })
-
-        const ocrResponse = await openaiClient.chat.completions.create({
-          model: 'gpt-4o',
-          max_tokens: 1500,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'file', file: { file_id: uploadedFile.id } } as never,
-              {
-                type: 'text',
-                text: `Extract from this invoice, bill, or bank statement. Return ONLY a valid JSON object with keys: vendor (string), date (YYYY-MM-DD string), invoice_number (string or null), total (number), subtotal (number or null), tax (number or null), tax_rate (string or null), currency (default INR), line_items (array of {description, quantity, unit_price, amount}), payment_mode (string or null). Use null for any field not found.`,
-              },
-            ],
-          }],
-        })
-
-        // Clean up the uploaded file
-        await openaiClient.files.del(uploadedFile.id).catch(() => {/* non-fatal */})
-
-        const content = ocrResponse.choices[0]?.message?.content || '{}'
-        try {
-          const jsonMatch = content.match(/\{[\s\S]*\}/)
-          extractedData = jsonMatch ? JSON.parse(jsonMatch[0]) : { raw: content, parseError: true }
-        } catch {
-          extractedData = { raw: content, parseError: true }
-        }
-
-        if (documentId) {
-          await supabase.from('documents').update({ ocr_extracted_data: extractedData, ocr_status: 'completed' })
-            .eq('id', documentId).eq('company_id', companyId)
-        }
-      } catch (ocrError: unknown) {
-        const errorMessage = ocrError instanceof Error ? ocrError.message : 'PDF extraction failed'
+        const errorMessage = ocrError instanceof Error ? ocrError.message : 'File extraction failed'
         if (documentId) {
           await supabase.from('documents').update({ ocr_status: 'failed' }).eq('id', documentId).eq('company_id', companyId)
         }

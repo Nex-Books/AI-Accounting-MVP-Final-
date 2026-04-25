@@ -2,6 +2,7 @@ import { streamText, tool, convertToModelMessages } from 'ai'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { PLAN_LIMITS, type PlanTier } from '@/lib/types'
+import { google } from '@ai-sdk/google'
 
 export const maxDuration = 60
 
@@ -91,7 +92,8 @@ When a user describes a transaction, you MUST:
   Cr: Bank/Cash
 
 ## WHEN TO ASK QUESTIONS
-Ask ONE question ONLY if:
+Ask ONE clear question ONLY if:
+- The data is incomplete (missing amount, date, account). DO NOT ASSUME MISSING VALUES. ALWAYS ASK.
 - GST rate not mentioned for a taxable transaction
 - Intra-state vs inter-state not clear (ask the state)
 - Cash or bank not clear
@@ -104,12 +106,15 @@ DO NOT ask if:
 - Non-taxable transaction (salary, rent under 50k, bank charges)
 
 ## RESPONSE FORMAT
-After creating an entry, always show:
-✅ Entry Created: [Reference Number]
-📋 [Description]
-💰 Amount: ₹[amount in Indian format]
+Always return EXACTLY in this strict format after processing:
 
-Then briefly explain the accounting treatment in 1-2 lines.
+Date: [YYYY-MM-DD]
+Debit Account: [Debit Account Name]
+Credit Account: [Credit Account Name]
+Amount: [Numeric Amount]
+Narration: [Narration details]
+
+For multiple entries, return a list using the same exact field layout. DO NOT wrap this in Markdown tables.
 
 ## FINANCIAL YEAR
 India: April 1 to March 31
@@ -213,7 +218,7 @@ Fiscal year start: ${company?.fiscal_year_start || '04-01'}
 
   try {
     const result = streamText({
-      model: openai('gpt-4o-mini'),
+      model: google('gemini-2.5-flash'),
       system: SYSTEM_PROMPT + '\n\n' + contextBlock,
       messages: await convertToModelMessages(messages),
       maxSteps: 5,
