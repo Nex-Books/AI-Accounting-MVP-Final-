@@ -60,9 +60,9 @@ export function JournalEntryForm({
   const router = useRouter()
   const isEditing = !!entry
   
-  const [date, setDate] = useState(entry?.date || entry?.entry_date || new Date().toISOString().split('T')[0])
-  const [reference, setReference] = useState(entry?.reference_number || entry?.reference || '')
-  const [narration, setNarration] = useState(entry?.description || entry?.narration || '')
+  const [date, setDate] = useState(entry?.date || new Date().toISOString().split('T')[0])
+  const [reference, setReference] = useState(entry?.reference_number || '')
+  const [narration, setNarration] = useState(entry?.description || '')
   const [lines, setLines] = useState<JournalLineInput[]>(
     entry?.lines?.map(l => ({
       id: l.id,
@@ -70,7 +70,7 @@ export function JournalEntryForm({
       party_id: l.party_id || '',
       debit: l.debit > 0 ? l.debit.toString() : '',
       credit: l.credit > 0 ? l.credit.toString() : '',
-      description: l.narration || l.description || '',
+      description: l.narration || '',
     })) || [emptyLine(), emptyLine()]
   )
   const [error, setError] = useState<string | null>(null)
@@ -133,7 +133,7 @@ export function JournalEntryForm({
       // Create/update journal entry
       const entryData = {
         company_id: companyId,
-        reference_number: isEditing ? (entry?.entry_number || entry?.reference_number) : nextEntryNumber,
+        reference_number: isEditing ? (entry?.reference_number) : nextEntryNumber,
         date,
         description: narration || null,
         created_by: userId,
@@ -225,7 +225,7 @@ export function JournalEntryForm({
               <Label htmlFor="entryNumber">Entry Number</Label>
               <Input
                 id="entryNumber"
-                value={isEditing ? (entry?.entry_number || entry?.reference_number || '') : nextEntryNumber}
+                value={isEditing ? (entry?.reference_number || '') : nextEntryNumber}
                 disabled
                 className="font-mono"
               />
