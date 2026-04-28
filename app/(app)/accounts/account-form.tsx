@@ -48,9 +48,9 @@ const subTypesByType: Record<AccountType, { value: AccountSubType; label: string
     { value: 'owner_equity', label: "Owner's Equity" },
     { value: 'retained_earnings', label: 'Retained Earnings' },
   ],
-  revenue: [
-    { value: 'operating_revenue' as AccountType as AccountType, label: 'Operating Revenue' },
-    { value: 'other_revenue' as AccountType as AccountType, label: 'Other Revenue' },
+  income: [
+    { value: 'operating_income', label: 'Operating Revenue' },
+    { value: 'other_income', label: 'Other Revenue' },
   ],
   expense: [
     { value: 'cost_of_goods', label: 'Cost of Goods Sold' },

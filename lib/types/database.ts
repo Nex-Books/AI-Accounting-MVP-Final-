@@ -2,16 +2,11 @@
 
 export type AccountType = "asset" | "liability" | "equity" | "income" | "expense"
 export type AccountSubType =
-  | "current_asset"
-  | "non_current_asset"
-  | "current_liability"
-  | "non_current_liability"
-  | "equity"
-  | "revenue"
-  | "cost_of_goods_sold"
-  | "operating_expense"
-  | "other_income"
-  | "other_expense"
+  | 'current_asset' | 'fixed_asset' | 'other_asset'
+  | 'current_liability' | 'long_term_liability'
+  | 'owner_equity' | 'retained_earnings'
+  | 'operating_income' | 'other_income'
+  | 'cost_of_goods' | 'operating_expense' | 'other_expense'
 
 export type PartyType = "customer" | "vendor" | "both"
 export type JournalStatus = "draft" | "posted" | "void"
