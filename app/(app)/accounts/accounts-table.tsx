@@ -370,7 +370,7 @@ function getTypeBadgeColor(type: AccountType): string {
     asset: 'border-chart-1 text-chart-1',
     liability: 'border-chart-5 text-chart-5',
     equity: 'border-chart-3 text-chart-3',
-    revenue: 'border-chart-2 text-chart-2',
+    income: 'border-chart-2 text-chart-2',
     expense: 'border-chart-4 text-chart-4',
   }
   return colors[type] || ''
